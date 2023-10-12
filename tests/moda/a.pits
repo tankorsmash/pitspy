@@ -1,0 +1,9 @@
+ModAClass:
+  name: 'Module A Class'
+  desc: 'wesc'
+  fields:
+    x:
+      desc: 'This is a variable'
+      public: false
+    y:
+      public: true
