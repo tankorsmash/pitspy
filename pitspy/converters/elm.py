@@ -37,6 +37,9 @@ type alias GenericFoo t = {
 
 
 ELM_HEADER = """\
+
+import Json.Decode exposing (Decoder, field, map, string, int, float, bool, list, dict, at, andThen, oneOf, fail, succeed)
+import Json.Encode exposing (Value, object, string, int, float, bool, list, dict, null, encode, decodeValue, decodeString, decodeInt, decodeFloat, decodeBool, decodeList, decodeDict, decodeNull, decodeValue, decodeObject, decodeField, decodeAt, decodeAndThen, decodeOneOf, decodeFail, decodeSucceed)
 """
 
 class TsBaseType(Enum):
@@ -118,19 +121,35 @@ class ElmEnumCustomMatch(PitspyCustomMatch):
 
 			enum_output += "\n\n\n"
 
+			if type(list(py_enum)[0].value) != str:
+				raise Exception("Only string enums are supported")
+
 			#convert enum to target_type
 			target_type = "String"
-			enum_output += f"convert{enum_name}To{target_type} : {enum_name} -> {target_type}\n"
-			enum_output += f"convert{enum_name}To{target_type} e =\n  case e of\n"
+			#TODO: support other types
+			convert_from_enum_name = f"convert{enum_name}To{target_type}"
+			enum_output += f"{convert_from_enum_name} : {enum_name} -> {target_type}\n"
+			enum_output += f"{convert_from_enum_name} e =\n  case e of\n"
 			for e in py_enum:
 				enum_output += f"    {e.name.title()} -> \"{e.value}\"\n"
 
 			#convert target_type to enum
-			enum_output += f"\n\nconvert{target_type}To{enum_name} : {target_type} -> Maybe {enum_name}\n"
-			enum_output += f"convert{target_type}To{enum_name} e =\n  case e of\n"
+			convert_to_enum_name = f"convert{target_type}To{enum_name}"
+			enum_output += f"\n\n{convert_to_enum_name} : {target_type} -> Maybe {enum_name}\n"
+			enum_output += f"{convert_to_enum_name} e =\n  case e of\n"
 			for e in py_enum:
 				enum_output += f"    \"{e.value}\" -> Just {e.name.title()}\n"
 			enum_output += f"    _ -> Nothing\n"
+
+			#json encoder
+			enum_output += f"\n\nencode{enum_name} : {enum_name} -> Value\n"
+			enum_output += f"encode{enum_name} =\n  {convert_from_enum_name} >> Encode.string\n"
+
+			#json decoder
+			decoder_name = "Decode.string"
+			#TODO: support other types
+			enum_output += f"\n\ndecode{enum_name} : Decoder {enum_name}\n"
+			enum_output += f"decode{enum_name} =\n  {decoder_name} >> Decode.andThen {convert_to_enum_name}\n"
 
 			output.append(enum_output)
 
