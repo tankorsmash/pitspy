@@ -39,7 +39,7 @@ class TsOpType(Enum):
 	INTERSECT = 2
 
 
-class TsPitspyCustomMatch(PitspyCustomMatch):
+class TsPitspyCustomMatch(PitspyCustomMatch['TsAnnotation']):
 	def match(self, py_cls: type[Any]) -> bool:
 		try:
 			return issubclass(py_cls.__class__, PitspyTypeMeta)
@@ -54,7 +54,7 @@ class TsEnumCustomMatch(PitspyCustomMatch):
 	has_block_export = True
 	caught_enums: set[type[Enum]]
 
-	def __init__(self) -> Never:
+	def __init__(self):
 		self.caught_enums = set()
 
 	def match(self, py_cls: type[Any]) -> bool:
@@ -100,9 +100,9 @@ class TsEnumCustomMatch(PitspyCustomMatch):
 		return '\n\n'.join(output)
 
 
-CUSTOM_HANDLERS: tuple[PitspyCustomMatch] = (
+CUSTOM_HANDLERS: tuple[PitspyCustomMatch, ...] = (
 	TsPitspyCustomMatch(), TsEnumCustomMatch()
-)
+    )
 
 @dataclass(frozen=True, kw_only=True)
 class TsAnnotation:
