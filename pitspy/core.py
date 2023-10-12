@@ -1,4 +1,4 @@
-from typing import TypeVar, Any, Never, Callable
+from typing import TypeVar, Any, Never, Callable, cast
 
 import inspect
 
@@ -7,7 +7,7 @@ from .utils import cls_python_path
 
 T = TypeVar('T')
 
-PITSPY_TREE_ROOT = PitspyNode[type[Any]](
+PITSPY_TREE_ROOT = PitspyNode[Any](
 	branches=dict(),
 	leafs=dict()
 )
@@ -33,10 +33,11 @@ def _pitspy_tree_add_class(cls: type[Any]) -> None:
 
 class PitspyTypeMeta(type):
 	def __new__(cls: type[T], name: str, bases: tuple, classdict: dict) -> type[T]:
-		obj = super().__new__(cls, name, bases, classdict)
-		if obj.__name__ != "PitspyType":
-			_pitspy_tree_add_class(obj)
-		return obj
+		obj = type.__new__(cls, name, bases, classdict)
+		obj_casted = cast(type[T], obj)
+		if obj_casted.__name__ != "PitspyType":
+			_pitspy_tree_add_class(obj_casted)
+		return obj_casted
 
 
 class PitspyType(metaclass=PitspyTypeMeta):
@@ -52,7 +53,7 @@ def convert_tree(
 ) -> PitspyNode[S]:
 	"""
 		Walk the tree and recursively apply `node_callback`
-		at every leaf to create a new tree based on the 
+		at every leaf to create a new tree based on the
 		return value of `node_callback`
 	"""
 	def _convert_tree(node: PitspyNode[T]) -> PitspyNode[S]:
@@ -73,30 +74,30 @@ def convert_tree(
 
 
 def get_annotation_tree(
-	annotation_reducer: Callable[[AnnotationDict], T] | None = None
-) -> PitspyNode[T]:
-	def annotater(cls: type[Any]) -> T:
+	annotation_reducer: Callable[[AnnotationDict], AnnotationDict] | None = None
+) -> PitspyNode[AnnotationDict]:
+	def annotater(cls: type[Any]) -> AnnotationDict:
 		annotation_dict = inspect.get_annotations(cls)
 		if annotation_reducer is not None:
 			return annotation_reducer(annotation_dict)
-		return annotation_dict 
+		return annotation_dict
 
 	return convert_tree(annotater)
 
 
 def traverse_tree_orderly(
 	tree: PitspyNode[T],
-	node_callback: Callable[[PitspyNode[T]], Never]
+	node_callback: Callable[[str, PitspyNode[T]], None]
 ) -> None:
 	in_order: list[PitspyNode[T]] = []
-	for branch_key, branch in tree.branches.items():
-		if branch.leafs:
-			node_callback(branch_key, branch)
+	for branch_key, branch_ in tree.branches.items():
+		if branch_.leafs:
+			node_callback(branch_key, branch_)
 		else:
-			in_order.append(branch)
-	
+			in_order.append(branch_)
+
 	try:
-		branch = in_order.pop(0)
+		branch : PitspyNode[T] | None = in_order.pop(0)
 	except IndexError:
 		branch = None
 

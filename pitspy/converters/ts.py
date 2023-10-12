@@ -188,7 +188,7 @@ def py_annotation_to_ts_annotation(pytation: type[Any]) -> TsAnnotation:
 	):
 		args = [
 			py_annotation_to_ts_annotation(a)
-			for a in pytation.__args__
+            for a in pytation.__args__ #type: ignore
 		]
 
 	return TsAnnotation(
