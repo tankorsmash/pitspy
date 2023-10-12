@@ -38,8 +38,8 @@ type alias GenericFoo t = {
 
 ELM_HEADER = """\
 
-import Json.Decode exposing (Decoder, field, map, string, int, float, bool, list, dict, at, andThen, oneOf, fail, succeed)
-import Json.Encode exposing (Value, object, string, int, float, bool, list, dict, null, encode, decodeValue, decodeString, decodeInt, decodeFloat, decodeBool, decodeList, decodeDict, decodeNull, decodeValue, decodeObject, decodeField, decodeAt, decodeAndThen, decodeOneOf, decodeFail, decodeSucceed)
+import Json.Decode as Decode exposing (Decoder, field, map, string, int, float, bool, list, dict, at, andThen, oneOf, fail, succeed)
+import Json.Encode as Encode exposing (Value, object, string, int, float, bool, list, dict, null, encode)
 """
 
 class TsBaseType(Enum):
@@ -148,8 +148,8 @@ class ElmEnumCustomMatch(PitspyCustomMatch):
 			#json decoder
 			decoder_name = "Decode.string"
 			#TODO: support other types
-			enum_output += f"\n\ndecode{enum_name} : Decoder {enum_name}\n"
-			enum_output += f"decode{enum_name} =\n  {decoder_name} >> Decode.andThen {convert_to_enum_name}\n"
+			enum_output += f"\n\ndecode{enum_name} : Decoder (Maybe {enum_name})\n"
+			enum_output += f"decode{enum_name} =\n  {decoder_name} |> Decode.map {convert_to_enum_name}\n"
 
 			output.append(enum_output)
 
