@@ -13,6 +13,7 @@ import humps
 from pitspy.types import AnnotationDict, PitspyCustomMatch, PitspyNode
 from pitspy.core import get_annotation_tree, traverse_tree_orderly, PitspyTypeMeta
 
+
 class TsBaseType(Enum):
 	NOT_BASE = ''
 	UNDEFINED = 'undefined'
@@ -253,6 +254,8 @@ def ts_annotation_to_str(annotation: TsAnnotation, nested: bool = False) -> str:
 	elif annotation.is_op:
 		if annotation.op == TsOpType.UNION:
 			result = ' | '.join([ts_annotation_to_str(a, nested=True) for a in annotation.arguments])
+	elif annotation.obj_ref:
+		result = annotation.obj_ref
 	
 	if result and nested and annotation.is_op:
 		return f'({result})'
