@@ -45,10 +45,10 @@ class TsPitspyCustomMatch(PitspyCustomMatch['TsAnnotation']):
 			return issubclass(py_cls.__class__, PitspyTypeMeta)
 		except TypeError:
 			return False
-	
+
 	def export(self, annotation: "TsAnnotation") -> str:
 		return get_export_name(annotation.obj_ref.__name__, is_class=True)
-	
+
 
 class TsEnumCustomMatch(PitspyCustomMatch):
 	has_block_export = True
@@ -62,15 +62,15 @@ class TsEnumCustomMatch(PitspyCustomMatch):
 			is_enum = issubclass(py_cls, Enum)
 		except TypeError:
 			return False
-		
+
 		if is_enum:
 			self.caught_enums.add(py_cls)
 
 		return is_enum
-	
+
 	def export(self, annotation: "TsAnnotation") -> str:
 		return get_export_name(annotation.obj_ref.__name__, is_enum=True)
-	
+
 	def export_block(self) -> str:
 		output: list[str] = []
 
@@ -87,7 +87,7 @@ class TsEnumCustomMatch(PitspyCustomMatch):
 				if isinstance(enum_choice.value, str):
 					enum_output += f"\t{enum_choice_output} = '{enum_choice.value}'{suffix}\n"
 					last_num_val = None
-				elif isinstance(enum_choice.value, int) or isinstance(enum_choice.value, float):	
+				elif isinstance(enum_choice.value, int) or isinstance(enum_choice.value, float):
 					if last_num_val is None or last_num_val + 1 != enum_choice.value:
 						enum_output += f"\t{enum_choice_output} = {enum_choice.value}{suffix}\n"
 					else:
@@ -149,7 +149,7 @@ def _py_to_ts_base(py_cls: type[Any]) -> TsBaseType:
 def _py_to_ts_op(py_cls: type[Any]) -> TsOpType:
 	if isinstance(py_cls, types.UnionType):
 		return TsOpType.UNION
-	
+
 	return TsOpType.NOT_OP
 
 
@@ -228,7 +228,7 @@ def get_export_name(identifier: str, is_class: bool = False, is_enum: bool = Fal
 
 def ts_annotation_to_str(annotation: TsAnnotation, nested: bool = False) -> str:
 	result = ""
-	
+
 	if annotation.is_custom and annotation.custom_match:
 		result = annotation.custom_match.export(annotation)
 	elif annotation.is_base:
@@ -239,7 +239,7 @@ def ts_annotation_to_str(annotation: TsAnnotation, nested: bool = False) -> str:
 	elif annotation.is_mutable:
 		if annotation.mutable == TsMutableType.DICT:
 			vt = ts_annotation_to_str(annotation.arguments[1])
-			
+
 			if annotation.arguments[0].base == TsBaseType.STRING:
 				result = f"{{[key: string]: {vt}}}"
 			else:
@@ -256,10 +256,10 @@ def ts_annotation_to_str(annotation: TsAnnotation, nested: bool = False) -> str:
 			result = ' | '.join([ts_annotation_to_str(a, nested=True) for a in annotation.arguments])
 	elif annotation.obj_ref:
 		result = annotation.obj_ref
-	
+
 	if result and nested and annotation.is_op:
 		return f'({result})'
-		
+
 	return result
 
 def write_ts_annotation_tree_to_interfaces_ts(
@@ -285,7 +285,7 @@ def write_ts_annotation_tree_to_interfaces_ts(
 					if annot.base != TsBaseType.GENERIC:
 						continue
 
-					gen_name = annot.obj_ref.__name__ 
+					gen_name = annot.obj_ref.__name__
 
 					if not annot.obj_ref.__constraints__:
 						generics.append(gen_name)
