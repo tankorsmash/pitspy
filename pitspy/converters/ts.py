@@ -221,7 +221,7 @@ TS_HEADER = """\
 """
 def get_export_name(identifier: str, is_class: bool = False, is_enum: bool = False) -> str:
 	if is_class:
-		return f'{identifier}Type'
+		return f'{identifier}'
 	elif is_enum:
 		return humps.pascalize(identifier)
 	return humps.camelize(identifier)
