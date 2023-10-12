@@ -109,9 +109,9 @@ class TsAnnotation:
 	op: TsOpType = TsOpType.NOT_OP
 	base: TsBaseType = TsBaseType.NOT_BASE
 	mutable: TsMutableType = TsMutableType.NOT_MUT
-	arguments: list[TsBaseType | TsMutableType | TsOpType] | None = None
+	arguments: list['TsAnnotation'] | None = None
 	custom_match: PitspyCustomMatch | None = None
-	obj_ref: type[Any] = None
+	obj_ref: type[Any] = type(None)
 
 	@property
 	def is_custom(self) -> bool:
@@ -265,7 +265,7 @@ def ts_annotation_to_str(annotation: TsAnnotation, nested: bool = False) -> str:
 def write_ts_annotation_tree_to_interfaces_ts(
 	tree: PitspyNode[TsAnnotation],
 	output_path: Path
-) -> Never:
+) -> None:
 	header = TS_HEADER.format(now=datetime.datetime.now().isoformat())
 
 	with open(output_path, encoding='UTF-8', mode='w') as output:
@@ -276,7 +276,7 @@ def write_ts_annotation_tree_to_interfaces_ts(
 				output.write(handler.export_block())
 				output.write('\n\n')
 
-		def write_node(node_key: str, node: PitspyNode[TsAnnotation]) -> Never:
+		def write_node(node_key: str, node: PitspyNode[TsAnnotation]) -> None:
 			for leaf_key, leaf in node.leafs.items():
 				type_name = get_export_name(leaf_key, is_class=True)
 
