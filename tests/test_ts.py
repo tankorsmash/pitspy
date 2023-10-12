@@ -2,7 +2,7 @@ from typing import Never
 import pathlib
 
 from pitspy.converters.ts import (
-    get_ts_annotation_tree, write_ts_annotation_tree_to_interfaces_ts
+	get_ts_annotation_tree, write_ts_annotation_tree_to_interfaces_ts
 )
 
 
